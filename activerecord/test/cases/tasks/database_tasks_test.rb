@@ -215,9 +215,10 @@ module ActiveRecord
       old_env = ENV["RAILS_ENV"]
       ENV["RAILS_ENV"] = "production"
 
-      @configurations['production'].merge!('username'=>'users_uname',
-        'password'=>'users_password')
+      @configurations['production'].merge!("username"=>"users_uname",
+        "password"=>"users_password")
       ActiveRecord::Tasks::DatabaseTasks.stubs(:class_for_adapter).raises(Exception)
+      ActiveRecord::Tasks::DatabaseTasks.stubs(:env).returns("production")
 
       $stderr.stubs(:puts).returns(true)
       $stderr.expects(:puts).
@@ -226,6 +227,28 @@ module ActiveRecord
       begin
         ActiveRecord::Tasks::DatabaseTasks.create_current(
           ActiveSupport::StringInquirer.new("production")
+        )
+      rescue Exception; end
+    ensure
+      ENV["RAILS_ENV"] = old_env
+    end
+
+    def test_creating_dev_fails_dump_credentials
+      old_env = ENV["RAILS_ENV"]
+      ENV["RAILS_ENV"] = "development"
+
+      @configurations["development"].merge!("username" => "users_uname",
+        "password" => "users_password")
+      ActiveRecord::Tasks::DatabaseTasks.stubs(:class_for_adapter).raises(Exception)
+      ActiveRecord::Tasks::DatabaseTasks.stubs(:env).returns("development")
+
+      $stderr.stubs(:puts).returns(true)
+      $stderr.expects(:puts).
+        with("Couldn't create database for #{@configurations["development"].inspect}")
+
+      begin
+        ActiveRecord::Tasks::DatabaseTasks.create_current(
+          ActiveSupport::StringInquirer.new("development")
         )
       rescue Exception; end
     ensure

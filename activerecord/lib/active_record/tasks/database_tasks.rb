@@ -119,8 +119,10 @@ module ActiveRecord
       rescue DatabaseAlreadyExists
         $stderr.puts "Database '#{configuration['database']}' already exists"
       rescue Exception => error
+        printable_config = (env == "production" ? configuration.except("username", "password") : configuration)
+
         $stderr.puts error
-        $stderr.puts "Couldn't create database for #{configuration.except("username","password").inspect}"
+        $stderr.puts "Couldn't create database for #{printable_config.inspect}"
         raise
       end
 

@@ -219,9 +219,6 @@ module ActiveRecord
         'password'=>'users_password')
       ActiveRecord::Tasks::DatabaseTasks.stubs(:class_for_adapter).raises(Exception)
 
-      expected_arguments_in_order = [Exception.new,
-        "Couldn't create database for #{@configurations["production"].except("username", "password").inspect}"]
-
       $stderr.stubs(:puts).returns(true)
       $stderr.expects(:puts).
         with("Couldn't create database for #{@configurations["production"].except("username","password").inspect}")
